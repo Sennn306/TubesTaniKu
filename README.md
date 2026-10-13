@@ -60,6 +60,22 @@ Proyek ini dikembangkan secara terintegrasi untuk memenuhi milestone perkuliahan
 
 ![Responsive 1024px](docs/responsiveTest/1024.png)
 
+## Kebutuhan Kriptografi Produk
+
+| Data                              | Tujuan Keamanan                                                                                           | Prioritas | Mekanisme / Algoritma                           |
+| :-------------------------------- | :-------------------------------------------------------------------------------------------------------- | :-------- | :---------------------------------------------- |
+| **Pernyataan Mutu Panen & Batch** | **Integritas & Keabsahan (Authenticity & Non-Repudiation)**Mencegah pemalsuan data grade dan bobot panen. | High      | **Digital Signature (ECDSA Ed25519)** & SHA-256 |
+| **Kredensial Pengguna**           | **Kerahasiaan (Confidentiality)**Proteksi kata sandi pengguna dari kebocoran database.                    | High      | **Password Hashing (Argon2id / bcrypt)**        |
+| **Token Akses API & QR Payload**  | **Integritas & Kerahsiaan (Integrity)**Memastikan sesi dan isi QR Code tidak dimodifikasi.                | Medium    | **AES-256-GCM / Signed Token**                  |
+
+## Rancangan Komponen (Batch Verification Engine)
+
+- **Masukan (Input):** Data objek batch panen (`BatchData`), Private Key / Public Key Agen QC (Ed25519).
+- **Proses:** Serialisasi JSON terkanonisasi, pembuatan Digital Signature menggunakan `crypto.sign()`, dan verifikasi menggunakan `crypto.verify()`.
+- **Keluaran (Output):** Signature String (Base64) & Status Keabsahan Boolean (`true`/`false`).
+- **Representasi Data:** String Base64.
+- **Sumber Keacakan:** CSPRNG Node.js (`crypto.generateKeyPairSync` / `crypto.randomBytes`).
+
 ## 📁 Struktur Proyek
 
 ```text
