@@ -79,4 +79,15 @@ Merancang modul Digital Signature (Ed25519) untuk keabsahan QR Code batch panen 
 
 ---
 
+## 📅 Sesi Keamanan & Komputasi Siber (14 Oktober 2026)
+
+- **Fokus:** Analisis Ancaman & Risiko (Threat Modeling STRIDE & Risk Register) untuk Penanda `sec-0.1`.
+- **Aktivitas:**
+  1. Membuat `docs/sec/asset-inventory.md` untuk pemetaan komponen dan data sensitif TaniKu v0.1.
+  2. Menyusun `docs/sec/dfd.md` dengan 2 Trust Boundary, ID Elemen DFD, dan penandaan Kriptografi Ed25519.
+  3. Mengidentifikasi 10 ancaman spesifik berkategori STRIDE pada `docs/sec/threat-model.md`.
+  4. Menyusun `docs/sec/risk-register.md` berisi evaluasi Likelihood/Impact berbasis kondisi nyata produk dan 5 rencana kontrol prioritas untuk Tugas 2 & 3.
+
+  ***
+
 _Log ini disusun otomatis sebagai lampiran bukti transparansi penggunaan AI Assistant dalam pemenuhan Milestone 1 TaniKu._
