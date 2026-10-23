@@ -1,11 +1,32 @@
+import { notFound } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import BadgeGrade from '@/components/BadgeGrade';
 import { MOCK_BATCHES } from '@/data/mockBatches';
 
+// 1. Wajib untuk prerender static shell pada Next.js 16 / Cache Components
+export function generateStaticParams() {
+  return MOCK_BATCHES.map((b) => ({
+    id: b.id,
+  }));
+}
+
 export default async function BatchDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
-  const item = MOCK_BATCHES.find((b) => b.id === resolvedParams.id) || MOCK_BATCHES[0];
+  const { id } = resolvedParams;
+
+  // 2. Validasi format ID (wajib diawali BATCH-)
+  if (!/^BATCH-[A-Za-z0-9-]+$/.test(id)) {
+    notFound();
+  }
+
+  // 3. Cari data batch berdasarkan ID
+  const item = MOCK_BATCHES.find((b) => b.id === id);
+
+  // 4. Jika ID sah tapi data tidak ada di mock, tampilkan 404
+  if (!item) {
+    notFound();
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
