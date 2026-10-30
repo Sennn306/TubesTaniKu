@@ -1,45 +1,32 @@
 import "server-only";
 import { MOCK_BATCHES, type BatchItem } from "@/data/mockBatches";
+import type { MasukanBatchPanen } from "./skema";
 
-// Re-export tipe agar terpusat
 export type { BatchItem };
 
-// Gunakan MOCK_BATCHES sebagai data awal di memori server
 export const daftarBatchPanen: BatchItem[] = [...MOCK_BATCHES];
 
-/**
- * Mencari detail batch panen berdasarkan ID batch.
- */
 export function cariBatch(id: string): BatchItem | undefined {
   return daftarBatchPanen.find((batch) => batch.id === id);
 }
 
-/**
- * Memeriksa apakah ID batch sudah pernah terdaftar.
- */
-export function batchSudahAda(id: string): boolean {
-  return daftarBatchPanen.some((batch) => batch.id === id);
+export function batchSudahAda(farmerName: string): boolean {
+  const dicari = farmerName.toLowerCase();
+  return daftarBatchPanen.some(
+    (batch) => batch.farmerName.toLowerCase() === dicari
+  );
 }
 
-/**
- * Menambahkan data batch panen baru ke memori server.
- */
-export function tambahBatch(
-  masukan: Omit<BatchItem, "id" | "imageUrl" | "pricePerKg"> & {
-    id?: string;
-    pricePerKg?: number;
-    imageUrl?: string;
-  }
-): BatchItem {
-  const id = masukan.id || `BATCH-${Date.now().toString().slice(-6)}`;
-  const batchBaru: BatchItem = {
+export function tambahBatch(masukan: MasukanBatchPanen): BatchItem {
+  const id = `batch-${Date.now()}`;
+  const item: BatchItem = {
     id,
-    pricePerKg: masukan.pricePerKg ?? 25000,
-    imageUrl:
-      masukan.imageUrl ??
-      "https://images.unsplash.com/photo-1588880331179-bc9b93a8cb5e?auto=format&fit=crop&q=80&w=400",
     ...masukan,
+    hubName: "Hub Utama",
+    harvestDate: new Date().toISOString().split("T")[0],
+    pricePerKg: 15000,
+    imageUrl: "/images/placeholder.jpg",
   };
-  daftarBatchPanen.unshift(batchBaru);
-  return batchBaru;
+  daftarBatchPanen.push(item);
+  return item;
 }
