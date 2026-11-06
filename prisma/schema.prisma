@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Komoditas {
+  Cabai_Merah @map("Cabai Merah")
+  Beras_Organik @map("Beras Organik")
+  Tomat
+}
+
+enum GradeMutu {
+  GRADE_A
+  GRADE_B
+}
+
+model BatchPanen {
+  id            Int            @id @default(autoincrement())
+  farmerName    String
+  commodityName Komoditas
+  weightKg      Float
+  grade         GradeMutu
+  isOrganic     Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  qualityChecks QualityCheck[]
+
+  @@unique([farmerName, commodityName])
+}
+
+model QualityCheck {
+  id            Int        @id @default(autoincrement())
+  batchId       Int
+  inspectorName String
+  score         Int
+  notes         String
+  checkedAt     DateTime   @default(now())
+  batch         BatchPanen @relation(fields: [batchId], references: [id], onDelete: Restrict)
+
+  @@unique([batchId, inspectorName])
+}

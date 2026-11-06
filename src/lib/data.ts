@@ -1,32 +1,19 @@
 import "server-only";
-import { MOCK_BATCHES, type BatchItem } from "@/data/mockBatches";
-import type { MasukanBatchPanen } from "./skema";
+import { prisma } from "@/lib/prisma";
 
-export type { BatchItem };
-
-export const daftarBatchPanen: BatchItem[] = [...MOCK_BATCHES];
-
-export function cariBatch(id: string): BatchItem | undefined {
-  return daftarBatchPanen.find((batch) => batch.id === id);
+export async function ambilDaftarBatch() {
+  return prisma.batchPanen.findMany({
+    orderBy: { createdAt: "desc" },
+  });
 }
 
-export function batchSudahAda(farmerName: string): boolean {
-  const dicari = farmerName.toLowerCase();
-  return daftarBatchPanen.some(
-    (batch) => batch.farmerName.toLowerCase() === dicari
-  );
-}
-
-export function tambahBatch(masukan: MasukanBatchPanen): BatchItem {
-  const id = `batch-${Date.now()}`;
-  const item: BatchItem = {
-    id,
-    ...masukan,
-    hubName: "Hub Utama",
-    harvestDate: new Date().toISOString().split("T")[0],
-    pricePerKg: 15000,
-    imageUrl: "/images/placeholder.jpg",
-  };
-  daftarBatchPanen.push(item);
-  return item;
+export async function ambilBatch(id: number) {
+  return prisma.batchPanen.findUnique({
+    where: { id },
+    include: {
+      qualityChecks: {
+        orderBy: { checkedAt: "desc" },
+      },
+    },
+  });
 }
