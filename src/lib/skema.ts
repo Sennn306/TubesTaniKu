@@ -25,3 +25,19 @@ export const skemaMasuk = z.object({
   email: z.email("Format email tidak valid"),
   kataSandi: z.string().min(8, "Kata sandi minimal 8 karakter"),
 });
+
+export const skemaQualityCheck = z.object({
+  inspectorName: z
+    .string()
+    .min(2, "Nama pemeriksa minimal 2 karakter")
+    .max(60, "Nama pemeriksa maksimal 60 karakter"),
+  score: z.coerce
+    .number()
+    .int()
+    .min(1, "Skor minimal 1")
+    .max(5, "Skor maksimal 5"),
+  notes: z
+    .string()
+    .min(5, "Catatan minimal 5 karakter")
+    .max(500, "Catatan maksimal 500 karakter"),
+});
