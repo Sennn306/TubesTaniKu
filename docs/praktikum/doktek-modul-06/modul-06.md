@@ -1,6 +1,6 @@
 # Dokumen Teknis Modul 6: PostgreSQL dan Prisma ORM
 
-**Nama / NIM** : Syakira Al-'Aafiyah / 105224030  
+**Nama / NIM** : Adrenalin Syahrobby / 105224030  
 **Nama Produk** : TubesTaniKu  
 **Repositori** : `https://github.com/username/tubestaniku`  
 **Branch** : `praktikum/modul-06`
