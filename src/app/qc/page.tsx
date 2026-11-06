@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Button from '@/components/Button';
@@ -42,7 +43,7 @@ export default function QCPage() {
       harvestDate: new Date().toISOString().split('T')[0],
     };
 
-    // 2. Simpan ke localStorage agar langsung muncul di katalog utama (/)
+    // 2. Simpan ke localStorage
     try {
       const existing = JSON.parse(localStorage.getItem('taniku_batches') || '[]');
       localStorage.setItem('taniku_batches', JSON.stringify([newBatch, ...existing]));
@@ -60,7 +61,21 @@ export default function QCPage() {
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
       <Navbar />
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Portal Agen QC — Entry Batch Panen</h1>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <h2 className="text-xs font-bold tracking-wider text-slate-500 uppercase">
+            Panel Kontrol Agen QC Desa
+          </h2>
+        </div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
+          <h1 className="text-2xl font-bold text-slate-900">Entry Cepat Hasil QC Desa</h1>
+          <Link
+            href="/katalog/tambah"
+            className="text-xs font-semibold text-emerald-700 hover:underline"
+          >
+            Form Resmi Basis Data (PostgreSQL) →
+          </Link>
+        </div>
 
         {successMsg && (
           <div role="status" className="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-sm">

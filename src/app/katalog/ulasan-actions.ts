@@ -2,7 +2,6 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-// Gunakan ../../../ untuk keluar sampai ke root folder proyek
 import { Prisma } from "../../../generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { skemaQualityCheck } from "@/lib/skema";
@@ -36,11 +35,11 @@ export async function tambahQualityCheck(
     throw e;
   }
 
-  revalidatePath(`/katalog/${batchId}`);
+  revalidatePath(`/batch/${batchId}`);
   return { pesan: "Inspeksi mutu tersimpan." };
 }
 
 export async function hapusQualityCheck(id: number, batchId: number) {
   await prisma.qualityCheck.deleteMany({ where: { id, batchId } });
-  revalidatePath(`/katalog/${batchId}`);
+  revalidatePath(`/batch/${batchId}`);
 }
