@@ -30,8 +30,8 @@ export default function TautanNav({ tautan }: TautanNavProps) {
               aria-current={aktif ? 'page' : undefined}
               className={`text-sm font-medium transition-colors ${
                 aktif
-                  ? 'text-emerald-600 font-semibold underline underline-offset-4'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'text-amber-300 font-semibold underline underline-offset-4'
+                  : 'text-emerald-100 hover:text-white'
               }`}
             >
               {t.label}
