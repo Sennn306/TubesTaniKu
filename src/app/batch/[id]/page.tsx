@@ -6,6 +6,7 @@ import { ambilBatch } from "@/lib/data";
 import { hapusBatchPanen } from "@/app/batch/actions";
 import { hapusQualityCheck } from "@/app/katalog/ulasan-actions";
 import FormQualityCheck from "@/components/FormQualityCheck";
+import { verifikasiTandaTanganBatch } from "@/batchSigner";
 
 export default async function DetailBatchPanen({
   params,
@@ -15,11 +16,22 @@ export default async function DetailBatchPanen({
   const id = Number((await params).id);
   if (!Number.isInteger(id) || id <= 0) notFound();
 
-  // 1. Ambil data BatchPanen beserta relasi QualityCheck dari PostgreSQL
   const batch = await ambilBatch(id);
   if (!batch) notFound();
 
   const namaKomoditas = batch.commodityName.replace(/_/g, " ");
+
+  const payloadKeabsahan = {
+    farmerName: batch.farmerName,
+    commodityName: batch.commodityName,
+    weightKg: batch.weightKg,
+    grade: batch.grade,
+  };
+
+  const statusIntegritas = verifikasiTandaTanganBatch(
+    payloadKeabsahan,
+    (batch as { signature?: string }).signature ?? ""
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
@@ -32,7 +44,6 @@ export default async function DetailBatchPanen({
           ← Kembali ke Katalog
         </Link>
 
-        {/* Header Detail Batch Panen */}
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex justify-between items-start">
             <div>
@@ -41,9 +52,22 @@ export default async function DetailBatchPanen({
                 Komoditas: <span className="font-semibold text-slate-800">{namaKomoditas}</span>
               </p>
             </div>
-            <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">
-              ID: #{batch.id}
-            </span>
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded">
+                ID: #{batch.id}
+              </span>
+              <span
+                className={`text-xs px-2 py-1 rounded font-semibold ${
+                  statusIntegritas
+                    ? "bg-emerald-100 text-emerald-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {statusIntegritas
+                  ? "✓ Terverifikasi Ed25519"
+                  : "⚠ Tanda Tangan Tidak Valid"}
+              </span>
+            </div>
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2 text-sm">
@@ -61,7 +85,6 @@ export default async function DetailBatchPanen({
           </div>
         </div>
 
-        {/* 2. Daftar Riwayat Inspeksi QualityCheck */}
         <h2 className="mt-8 text-xl font-bold text-slate-900">
           Riwayat Inspeksi Mutu ({batch.qualityChecks.length})
         </h2>
@@ -81,7 +104,6 @@ export default async function DetailBatchPanen({
                 <p className="mt-2 text-sm text-slate-700">{qc.notes}</p>
                 <div className="mt-3 flex justify-between items-center text-xs text-slate-400 border-t border-slate-100 pt-2">
                   <span>{new Date(qc.checkedAt).toLocaleString("id-ID")}</span>
-                  {/* Hapus Catatan Quality Check */}
                   <form action={hapusQualityCheck.bind(null, qc.id, batch.id)}>
                     <button type="submit" className="text-red-600 hover:text-red-800 font-medium underline">
                       Hapus Inspeksi
@@ -93,10 +115,8 @@ export default async function DetailBatchPanen({
           </ul>
         )}
 
-        {/* 3. Formulir Tambah QualityCheck Baru */}
         <FormQualityCheck batchId={batch.id} />
 
-        {/* 4. Tombol Hapus Batch Panen (Transaksional RESTRICT) */}
         <div className="mt-8 border-t border-slate-200 pt-6">
           <form action={hapusBatchPanen.bind(null, batch.id)}>
             <button
