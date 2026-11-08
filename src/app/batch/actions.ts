@@ -44,27 +44,21 @@ export async function simpanBatchPanen(
     throw e;
   }
 
-  revalidatePath("/");
-  redirect("/");
+  revalidatePath("/batch");
+  revalidatePath("/katalog");
+  redirect("/katalog");
 }
 
 export async function hapusBatchPanen(id: number) {
   const sesi = await bacaSesi();
-  if (!sesi) redirect("/masuk");
+  if (!sesi) throw new Error("Tidak terautentikasi");
 
-  try {
-    await prisma.$transaction([
-      prisma.qualityCheck.deleteMany({ where: { batchId: id } }),
-      prisma.batchPanen.delete({ where: { id } }),
-    ]);
-  } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
-      // Record not found or already deleted
-    } else {
-      throw e;
-    }
-  }
+  await prisma.$transaction([
+    prisma.qualityCheck.deleteMany({ where: { batchId: id } }),
+    prisma.batchPanen.delete({ where: { id } }),
+  ]);
 
-  revalidatePath("/");
-  redirect("/");
+  revalidatePath("/batch");
+  revalidatePath("/katalog");
+  redirect("/katalog");
 }
