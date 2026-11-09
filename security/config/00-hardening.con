@@ -1,0 +1,14 @@
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+AllowUsers deploy
+MaxAuthTries 3
+LoginGraceTime 30
+X11Forwarding no
+AllowTcpForwarding no
+AllowAgentForwarding no
+ClientAliveCountMax 2
+LogLevel VERBOSE
+MaxSessions 2
+TCPKeepAlive no
