@@ -90,4 +90,20 @@ Merancang modul Digital Signature (Ed25519) untuk keabsahan QR Code batch panen 
 
   ***
 
+# AI Log - (TaniKu v0.2)
+
+## 📅 PAW (08 November 2026)
+
+| Alat AI | Tujuan                                         | Ringkasan Perintah (Prompt)                                                                                                 | Bagian yang Dipakai / Diubah                                                                                                 | Cara Pemeriksaan & Verifikasi                                                                                                              |
+| :------ | :--------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| Gemini  | Integrasi PostgreSQL & Server Actions Prisma 7 | "Lanjutkan Milestone 2 TaniKu dengan mengintegrasikan PostgreSQL dan Prisma 7 untuk entitas BatchPanen dan QualityCheck..." | Berkas `src/app/batch/actions.ts`, `src/app/katalog/actions.ts`, `src/app/katalog/ulasan-actions.ts`, dan `src/lib/data.ts`. | Menjalankan `npx prisma db seed`, memeriksa data di Prisma Studio (`npx prisma studio`), dan menguji operasi CRUD langsung via UI Next.js. |
+| Gemini  | Pembuatan Komponen Form & Penanganan Galat     | "Buat komponen FormQualityCheck.tsx dan perbarui rute detail katalog untuk menangani Server Actions dan validasi Zod..."    | Berkas `src/components/FormQualityCheck.tsx` dan `src/app/katalog/[id]/page.tsx`.                                            | Memastikan tipe data valid via `npx tsc --noEmit` dan `npm run lint`, serta menguji pengiriman form input tidak sah pada browser.          |
+| Gemini  | Penyusunan Dokumen Teknis & Skenario Uji       | "Susunkan file MD untuk dokumen teknis modul-06.md dan perbarui README.md sesuai kebutuhan Milestone 2..."                  | Berkas `docs/praktikum/modul-06.md` dan `README.md`.                                                                         | Menguji 10 skenario pengujian (8 CRUD + 2 Relasi Data) secara manual pada aplikasi dan memastikan seluruh skenario berstatus LULUS (100%). |
+
+## Kriptografi AEAD (08 November 2026)
+
+| Alat AI | Tujuan                                          | Ringkasan Perintah (Prompt)                                                                         | Bagian yang Dipakai / Diubah                                                          | Cara Pemeriksaan & Verifikasi                                                                                                               |
+| :------ | :---------------------------------------------- | :-------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------ |
+| Gemini  | Pembuatan Modul Kriptografi AEAD & Skenario Uji | "Tujuan Melindungi kerahasiaan dan integritas data produk dengan enkripsi terautentikasi (AEAD)..." | Kode `src/lib/aeadCipher.ts`, `test/aeadCipher.test.ts`, dan struktur `KEPUTUSAN.md`. | Mengeksekusi pengujian otomatis `npx jest test/aeadCipher.test.ts` (4/4 passed) dan memverifikasi kegagalan dekripsi saat tag/kunci diubah. |
+
 _Log ini disusun otomatis sebagai lampiran bukti transparansi penggunaan AI Assistant dalam pemenuhan Milestone 1 TaniKu._
