@@ -91,3 +91,32 @@ Merancang modul Digital Signature (Ed25519) untuk keabsahan QR Code batch panen 
   ***
 
 _Log ini disusun otomatis sebagai lampiran bukti transparansi penggunaan AI Assistant dalam pemenuhan Milestone 1 TaniKu._
+
+
+---
+
+# AI Log - Modul 7: Debugging dan Telaah Kode
+
+## 📅 Sesi Praktikum & Investigasi Galat (20 November 2026)
+
+- **Alat yang Digunakan:** Google Gemini (Antigravity AI Assistant).
+- **Fokus Utama:** Penelusuran galat hasil usulan AI pada Server Actions, validasi skema Zod, Prisma ORM, dan Client Component.
+
+### Ringkasan Perintah & Potongan Kode dari AI
+1. **Prompt 1:** *"Refaktor validasi formulir batch panen agar mendukung input select/boolean dari form HTML dan perbaiki server action hapus item agar lebih ringkas."*
+   - Usulan AI: Menyarankan penggunaan `z.coerce.boolean()` untuk kolom boolean formulir dan membungkus `hapusBatchPanen` dalam blok `try...catch` tunggal yang memuat `redirect("/katalog")`.
+2. **Prompt 2:** *"Tambahkan penghitung karakter sisa pada komponen formulir ulasan/catatan mutu di React."*
+   - Usulan AI: Membuat state `sisa` dengan `useState(500)` dan efek `useEffect(() => { setSisa(500 - notes.length); }, [])`.
+
+### Galat yang Ditemukan
+1. **Galat Logika Koersi Boolean (Issue #11):** `z.coerce.boolean()` memanggil `Boolean("false")` yang bernilai `true`, sehingga pilihan false tidak pernah tersimpan ke basis data.
+2. **Galat Navigasi Tertelan (Issue #12):** `redirect("/katalog")` di dalam blok `try` melempar `NEXT_REDIRECT` yang tertangkap blok `catch`, membatalkan pengalihan rute.
+3. **Galat Penelanan Eksepsi Prisma (Issue #13):** Pelanggaran relasi foreign key `P2003` ditelan oleh `console.log("Gagal menghapus")` tanpa penanganan memadai (OWASP A10).
+4. **Galat Sinkronisasi State React (Issue #14):** Larik dependensi `[]` pada `useEffect` menyebabkan penghitung karakter membeku pada angka 500 dan tidak pernah berkurang saat mengetik.
+
+### Tindakan Koreksi dan Verifikasi
+- Mengganti `z.coerce.boolean()` dengan `z.stringbool()` (Zod 4).
+- Memindahkan `redirect()` ke luar blok `try...catch`.
+- Menerapkan `prisma.$transaction` untuk penghapusan entitas berelasi secara atomik serta mengalirkan unhandled error ke error boundary `src/app/batch/[id]/error.tsx`.
+- Menghapus `useState` sisa dan `useEffect`, menggunakan nilai turunan murni (*derived state*) saat render.
+- Seluruh perbaikan diverifikasi dengan debugger VS Code (`--inspect`), DevTools Network, dan pengujian berulang 5/5 kali, serta lolos `npx tsc --noEmit` dan `npm run lint`.
