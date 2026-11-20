@@ -2,7 +2,7 @@
 
 **Nama/NIM** : Adrenalin Syahrobby / 105224030  
 **Repositori** : [https://github.com/Sennn306/TubesTaniKu](https://github.com/Sennn306/TubesTaniKu)  
-**Pull request**: [https://github.com/Sennn306/TubesTaniKu/pull/5](https://github.com/Sennn306/TubesTaniKu/pull/5) (praktikum/modul-07)
+**Pull request**: [https://github.com/Sennn306/TubesTaniKu/pull/8](https://github.com/Sennn306/TubesTaniKu/pull/8) (praktikum/modul-07)
 
 ---
 
