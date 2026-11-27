@@ -1,0 +1,478 @@
+openapi: 3.1.0
+info:
+  title: TaniKu Micro-Hub API
+  version: 1.0.0
+  description: >
+    RESTful API untuk pengelolaan koleksi BatchPanen dan riwayat inspeksi mutu
+    QualityCheck pada platform TaniKu (tubestaniku).
+  license:
+    name: MIT
+    identifier: MIT
+servers:
+  - url: /api/v1
+    description: Server lokal /api/v1
+security: []
+tags:
+  - name: BatchPanen
+    description: Operasi CRUD untuk resource utama BatchPanen.
+  - name: QualityCheck
+    description: Operasi pembacaan relasi QualityCheck milik BatchPanen.
+
+paths:
+  /batch-panen:
+    get:
+      tags:
+        - BatchPanen
+      summary: Ambil daftar batch panen
+      description: >
+        Mengambil koleksi BatchPanen dengan dukungan paginasi (batas maksimal 50)
+        dan filter opsional berdasarkan komoditas.
+      operationId: listBatchPanen
+      parameters:
+        - name: halaman
+          in: query
+          required: false
+          description: Nomor halaman yang diminta (minimal 1).
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: batas
+          in: query
+          required: false
+          description: Jumlah item per halaman (1 hingga 50).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+        - name: komoditas
+          in: query
+          required: false
+          description: Filter jenis komoditas panen.
+          schema:
+            $ref: "#/components/schemas/Komoditas"
+      responses:
+        "200":
+          description: Daftar batch panen beserta metadata paginasi.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchPanenListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestProblem"
+        "500":
+          $ref: "#/components/responses/InternalErrorProblem"
+
+    post:
+      tags:
+        - BatchPanen
+      summary: Buat batch panen baru
+      description: >
+        Mencatat BatchPanen baru setelah validasi Zod. Menolak duplikasi
+        kombinasi farmerName dan commodityName dengan status 409 Conflict.
+      operationId: createBatchPanen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchPanenCreateInput"
+      responses:
+        "201":
+          description: Batch panen berhasil dibuat.
+          headers:
+            Location:
+              description: URI resource batch panen yang baru dibuat.
+              required: true
+              schema:
+                type: string
+                example: /api/v1/batch-panen/3
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchPanenSingleResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestProblem"
+        "409":
+          $ref: "#/components/responses/ConflictProblem"
+        "422":
+          $ref: "#/components/responses/ValidationProblem"
+        "500":
+          $ref: "#/components/responses/InternalErrorProblem"
+
+  /batch-panen/{id}:
+    parameters:
+      - $ref: "#/components/parameters/BatchIdParam"
+
+    get:
+      tags:
+        - BatchPanen
+      summary: Ambil detail batch panen
+      description: Mengambil detail satu BatchPanen berdasarkan ID bilangan bulat positif.
+      operationId: getBatchPanenById
+      responses:
+        "200":
+          description: Detail batch panen ditemukan.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchPanenSingleResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestProblem"
+        "404":
+          $ref: "#/components/responses/NotFoundProblem"
+        "500":
+          $ref: "#/components/responses/InternalErrorProblem"
+
+    patch:
+      tags:
+        - BatchPanen
+      summary: Perbarui sebagian data batch panen
+      description: >
+        Memperbarui satu atau lebih field BatchPanen berdasarkan ID. Body kosong
+        ditolak dengan 422 Unprocessable Content.
+      operationId: updateBatchPanen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchPanenPatchInput"
+      responses:
+        "200":
+          description: Batch panen berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchPanenSingleResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestProblem"
+        "404":
+          $ref: "#/components/responses/NotFoundProblem"
+        "409":
+          $ref: "#/components/responses/ConflictProblem"
+        "422":
+          $ref: "#/components/responses/ValidationProblem"
+        "500":
+          $ref: "#/components/responses/InternalErrorProblem"
+
+    delete:
+      tags:
+        - BatchPanen
+      summary: Hapus batch panen
+      description: >
+        Menghapus BatchPanen berdasarkan ID. Ditolak dengan 409 Conflict apabila
+        batch masih memiliki catatan QualityCheck (onDelete: Restrict).
+      operationId: deleteBatchPanen
+      responses:
+        "204":
+          description: Batch panen berhasil dihapus tanpa body respons.
+        "400":
+          $ref: "#/components/responses/BadRequestProblem"
+        "404":
+          $ref: "#/components/responses/NotFoundProblem"
+        "409":
+          $ref: "#/components/responses/ConflictProblem"
+        "500":
+          $ref: "#/components/responses/InternalErrorProblem"
+
+  /batch-panen/{id}/quality-checks:
+    parameters:
+      - $ref: "#/components/parameters/BatchIdParam"
+
+    get:
+      tags:
+        - QualityCheck
+      summary: Ambil riwayat inspeksi mutu batch panen
+      description: >
+        Mengambil seluruh daftar QualityCheck milik suatu BatchPanen berdasarkan ID,
+        diurutkan dari pemeriksaan terbaru.
+      operationId: listBatchQualityChecks
+      responses:
+        "200":
+          description: Daftar riwayat inspeksi mutu untuk batch terkait.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QualityCheckListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestProblem"
+        "404":
+          $ref: "#/components/responses/NotFoundProblem"
+        "500":
+          $ref: "#/components/responses/InternalErrorProblem"
+
+components:
+  parameters:
+    BatchIdParam:
+      name: id
+      in: path
+      required: true
+      description: ID BatchPanen berupa bilangan bulat positif.
+      schema:
+        type: integer
+        minimum: 1
+        example: 2
+
+  schemas:
+    Komoditas:
+      type: string
+      enum:
+        - Cabai Merah
+        - Beras Organik
+        - Tomat
+
+    GradeMutu:
+      type: string
+      enum:
+        - GRADE_A
+        - GRADE_B
+
+    BatchPanen:
+      type: object
+      required:
+        - id
+        - farmerName
+        - commodityName
+        - weightKg
+        - grade
+        - isOrganic
+        - createdAt
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 2
+        farmerName:
+          type: string
+          minLength: 3
+          maxLength: 80
+          example: sardi
+        commodityName:
+          $ref: "#/components/schemas/Komoditas"
+        weightKg:
+          type: number
+          exclusiveMinimum: 0
+          maximum: 10000
+          example: 9
+        grade:
+          $ref: "#/components/schemas/GradeMutu"
+        isOrganic:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-11-08T10:51:46.176Z"
+
+    BatchPanenCreateInput:
+      type: object
+      required:
+        - farmerName
+        - commodityName
+        - weightKg
+        - grade
+      properties:
+        farmerName:
+          type: string
+          minLength: 3
+          maxLength: 80
+          example: Petani Uji API 01
+        commodityName:
+          $ref: "#/components/schemas/Komoditas"
+        weightKg:
+          type: number
+          exclusiveMinimum: 0
+          maximum: 10000
+          example: 42.5
+        grade:
+          $ref: "#/components/schemas/GradeMutu"
+        isOrganic:
+          type: boolean
+          default: false
+          example: true
+
+    BatchPanenPatchInput:
+      type: object
+      minProperties: 1
+      properties:
+        farmerName:
+          type: string
+          minLength: 3
+          maxLength: 80
+          example: Petani Pembaruan
+        commodityName:
+          $ref: "#/components/schemas/Komoditas"
+        weightKg:
+          type: number
+          exclusiveMinimum: 0
+          maximum: 10000
+          example: 55
+        grade:
+          $ref: "#/components/schemas/GradeMutu"
+        isOrganic:
+          type: boolean
+          example: false
+
+    QualityCheck:
+      type: object
+      required:
+        - id
+        - batchId
+        - inspectorName
+        - score
+        - notes
+        - checkedAt
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 3
+        batchId:
+          type: integer
+          minimum: 1
+          example: 2
+        inspectorName:
+          type: string
+          minLength: 2
+          maxLength: 60
+          example: sanzu
+        score:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        notes:
+          type: string
+          minLength: 5
+          maxLength: 500
+          example: Kualitas sesuai standar mutu mikro-hub.
+        checkedAt:
+          type: string
+          format: date-time
+          example: "2026-11-08T11:04:47.732Z"
+
+    PaginationMeta:
+      type: object
+      required:
+        - halaman
+        - batas
+        - total
+        - totalHalaman
+      properties:
+        halaman:
+          type: integer
+          minimum: 1
+          example: 1
+        batas:
+          type: integer
+          minimum: 1
+          maximum: 50
+          example: 10
+        total:
+          type: integer
+          minimum: 0
+          example: 1
+        totalHalaman:
+          type: integer
+          minimum: 0
+          example: 1
+
+    BatchPanenListResponse:
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/BatchPanen"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    BatchPanenSingleResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/BatchPanen"
+
+    QualityCheckListResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/QualityCheck"
+
+    ProblemDetails:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+      properties:
+        type:
+          type: string
+          format: uri
+          example: https://taniku.local/problems/validation-error
+        title:
+          type: string
+          example: Unprocessable Content
+        status:
+          type: integer
+          example: 422
+        detail:
+          type: string
+          example: Data masukan tidak memenuhi aturan validasi.
+        instance:
+          type: string
+          example: /api/v1/batch-panen
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
+  responses:
+    BadRequestProblem:
+      description: Permintaan tidak valid (JSON rusak atau parameter query/path salah).
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+
+    NotFoundProblem:
+      description: Resource tidak ditemukan.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+
+    ConflictProblem:
+      description: Konflik integritas data (duplikasi unik atau batasan relasi FK).
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+
+    ValidationProblem:
+      description: Payload JSON tidak memenuhi skema validasi Zod.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+
+    InternalErrorProblem:
+      description: Kesalahan internal server.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
